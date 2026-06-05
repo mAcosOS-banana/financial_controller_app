@@ -5,7 +5,7 @@ from typing import List
 class RegisterSuccessResponseSchema(BaseModel):
     message : str
     user_id : str
-    access_token : str
+    access_token : str  
     
     
     class Config:

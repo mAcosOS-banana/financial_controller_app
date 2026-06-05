@@ -26,7 +26,7 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 def register():
     try:
         data = RegisterSchema.model_validate(request.get_json())
-        user , token = AuthenticationService.register(data)
+        user , token, refresh = AuthenticationService.register(data)
         response_validate_model = RegisterSuccessResponseSchema.model_validate({
             "message" : "Usuário criado com sucesso!",
             "user_id" : user.id,

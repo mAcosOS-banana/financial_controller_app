@@ -39,7 +39,7 @@ class TestRegister:
 
     @patch("routes.auth.auth_routes.AuthenticationService.register")
     def test_register_success(self, mock_register, client):
-        mock_register.return_value = (fake_user(), "fake.jwt.token")
+        mock_register.return_value = (fake_user(), "fake.jwt.token", "fake.jwt.refresh")
 
         resp = client.post("/auth/register", json={
             "name": "João",
@@ -47,7 +47,6 @@ class TestRegister:
             "password": "Banana@123",
         })
 
-        print(resp.get_json())
         assert resp.status_code == 201
         data = resp.get_json()
         assert data["user_id"] == "abc123"
@@ -146,7 +145,6 @@ class TestMe:
         resp = client.get("/auth/me", headers={
             "Authorization": f"Bearer {token}"
         })
-        print(resp.get_json())
         # ASSERT
         assert resp.status_code == 200
         data = resp.get_json()

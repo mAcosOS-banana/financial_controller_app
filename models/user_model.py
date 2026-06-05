@@ -18,4 +18,4 @@ class User(db.Model):
 
     # Pega a password passada pelo user e compara com o hash
     def check_password(self, password):
-        self.password_hash = bcrypt.check_password_hash(self.password_hash, password) 
+        return bcrypt.check_password_hash(self.password_hash, password) 
