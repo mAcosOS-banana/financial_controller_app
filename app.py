@@ -4,13 +4,17 @@ from flask_login import login_manager, current_user
 from server.extensions import db
 from server.extensions import bcrypt
 from server.extensions import jwt_manager
+from server.extensions import migrate
 
 from dotenv import load_dotenv
 import os
 from datetime import timedelta
 
 
-from models.user_model import User
+from models.auth_models.user_models.user_model import User
+from models.buisness_models.transactions_models.transactions import Transaction
+from models.buisness_models.transactions_models.categories  import Category
+from models.buisness_models.planning_models.planning import Planning
 
 from routes.auth.auth_routes import auth_bp
 
@@ -28,7 +32,7 @@ def create_app():
     db.init_app(app)
     bcrypt.init_app(app)
     jwt_manager.init_app(app)
-
+    migrate.init_app(app, db)
 
     app.register_blueprint(auth_bp)
     return app

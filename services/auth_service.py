@@ -1,7 +1,7 @@
 from flask_jwt_extended import create_access_token, create_refresh_token, get_jwt_identity
 
 from server.extensions import db
-from models.user_model import User
+from models.auth_models.user_models.user_model import User
 
 from utils.context_manager import db_trasaction
 

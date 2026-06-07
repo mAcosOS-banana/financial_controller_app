@@ -12,7 +12,7 @@ from DTOs.auth.register.register_reponses_schemas import RegisterSuccessResponse
 
 from DTOs.auth.login.login_schemas import LoginSchema
 from DTOs.auth.login.login_responses_schemas import LoginSuccessResponseSchema, LoginFailResponseSchema
-from DTOs.auth.getter.get_me_response_schema import UserResponseSchema
+from DTOs.auth.getter.get_me_response_schema import ResponseUserSchema
 
 from pydantic import ValidationError
 
@@ -95,7 +95,7 @@ def refresh():
 def me():
     user_id = get_jwt_identity()
     user = AuthenticationService.me(user_id)
-    validated_response = UserResponseSchema.model_validate({
+    validated_response = ResponseUserSchema.model_validate({
             "user_id" : user.id ,
             "name" : user.name,
             "email" : user.email
