@@ -1,0 +1,51 @@
+# ─── Sensível — NUNCA versionar ───
+.env
+.env.*
+*.pem
+*.key
+secrets.json
+instance/
+
+# ─── Python ───
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# ─── Ambiente virtual ───
+.venv/
+venv/
+env/
+ENV/
+
+# ─── Banco de dados ───
+*.db
+*.sqlite
+*.sqlite3
+
+# ─── Flask / Migrations ───
+# (mantenha a pasta migrations/ versionada — ela é parte do projeto;
+#  ignore só caches gerados)
+instance/
+
+# ─── Testes e cobertura ───
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# ─── Editores / IDEs ───
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ─── Sistema operacional ───
+.DS_Store
+Thumbs.db
+
+# ─── Build / distribuição ───
+build/
+dist/
+*.egg-info/

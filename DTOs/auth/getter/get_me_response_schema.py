@@ -10,6 +10,7 @@ class ResponseUserSchema(BaseModel):
         from_attributes = True
 
 class ResponseMultipleUsersSchema(BaseModel):
+    message : str
     user : List[ResponseUserSchema]
 
     class Config:
