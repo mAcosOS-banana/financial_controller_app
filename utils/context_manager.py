@@ -2,7 +2,7 @@ from contextlib import contextmanager
 from server.extensions import db
 
 @contextmanager
-def db_trasaction():
+def db_transaction():
     try:
         yield
         db.session.commit()

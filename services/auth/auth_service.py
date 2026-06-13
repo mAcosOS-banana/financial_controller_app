@@ -3,12 +3,11 @@ from flask_jwt_extended import create_access_token, create_refresh_token, get_jw
 from server.extensions import db
 from models.auth_models.user_models.user_model import User
 
-from utils.context_manager import db_trasaction
+from utils.context_manager import db_transaction
 
 from DTOs.auth.register.register_schemas import RegisterSchema 
 from DTOs.auth.login.login_schemas import LoginSchema 
 
-from pydantic import ValidationError
 
 class AuthenticationService:
 
@@ -17,7 +16,7 @@ class AuthenticationService:
         if User.query.filter_by(email=data.email).first():
             raise ValueError("Email já cadastrado. Por favor tende novamente ou recupere a senha.")
         
-        with db_trasaction():
+        with db_transaction():
             user = User(name=data.name, email=data.email)
             user.set_password(data.password)
             db.session.add(user)

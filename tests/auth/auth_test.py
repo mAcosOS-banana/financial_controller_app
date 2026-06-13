@@ -49,8 +49,8 @@ class TestRegister:
 
         assert resp.status_code == 201
         data = resp.get_json()
-        assert data["user_id"] == "abc123"
-        assert data["access_token"] == "fake.jwt.token"
+        assert data["data"]["user_id"] == "abc123"
+        assert data["data"]["access_token"] == "fake.jwt.token"
         assert data["message"] == "Usuário criado com sucesso!"
 
     def test_register_validation_error(self, client):
@@ -104,8 +104,8 @@ class TestLogin:
 
         assert resp.status_code == 200
         data = resp.get_json()
-        assert data["access_token"] == "access.token"
-        assert data["refresh_token"] == "refresh.token"
+        assert data["data"]["access_token"] == "access.token"
+        assert data["data"]["refresh_token"] == "refresh.token"
         assert data["message"] == "Login bem-sucedido"
 
     @patch("routes.auth.auth_routes.AuthenticationService.login")

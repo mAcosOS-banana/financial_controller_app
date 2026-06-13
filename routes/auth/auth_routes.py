@@ -5,7 +5,7 @@ from flask_jwt_extended import (
     create_access_token,
     verify_jwt_in_request
 )
-from services.auth_service import AuthenticationService
+from services.auth.auth_service import AuthenticationService
 
 from DTOs.auth.register.register_schemas import RegisterSchema
 from DTOs.auth.register.register_reponses_schemas import RegisterSuccessResponseSchema , RegisterFailResponseSchema
@@ -29,8 +29,10 @@ def register():
         user , token, refresh = AuthenticationService.register(data)
         response_validate_model = RegisterSuccessResponseSchema.model_validate({
             "message" : "Usuário criado com sucesso!",
-            "user_id" : user.id,
-            "access_token" : token
+            "data": {
+                "user_id" : user.id,
+                "access_token" : token
+            }
         })
 
         return jsonify(response_validate_model.model_dump()) , 201
@@ -60,8 +62,10 @@ def login():
 
         response_validated = LoginSuccessResponseSchema.model_validate({
             "message" : "Login bem-sucedido",
-            "access_token": access_token,
-            "refresh_token" : refresh_token
+            "data":{
+                "access_token": access_token,
+                "refresh_token" : refresh_token
+            }
         })
         
         return jsonify(response_validated.model_dump()), 200

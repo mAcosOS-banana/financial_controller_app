@@ -9,12 +9,12 @@ class Transaction(db.Model):
     title = db.Column(db.String(80), nullable=False)
     description = db.Column(db.String(250), nullable=True)
 
-    category = db.Column(db.String(32), db.ForeignKey("categories.id") ,nullable=False)    
+    category_id = db.Column(db.String(32), db.ForeignKey("categories.id") ,nullable=False)    
     
     type = db.Column(db.String(10), nullable=False)
     value = db.Column(db.Numeric(20, 2), nullable=False)
     
-    due_date= db.Colunm(db.Date, nullable=False)
+    due_date= db.Column(db.Date, nullable=False)
     paid_at= db.Column(db.Date, nullable=True)
     
     is_deleted = db.Column(db.Boolean, default=False, nullable=False)

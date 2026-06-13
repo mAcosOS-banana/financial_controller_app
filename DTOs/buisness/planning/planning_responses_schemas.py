@@ -20,7 +20,7 @@ class ResponseCreatePlannigSuccessSchema(BaseModel):
     class Config:
         from_attributes = True
 
-class ResponseFailPlannigSuccessSchema:
+class ResponseFailPlannigSchema:
     message : str
     errors : List[ErrorDetails]
 
@@ -38,7 +38,7 @@ class ReponseGetPlanningSchema(BaseModel):
     class Config:
         from_attributes = True
 
-class ResponseMultiplePlanningSchema(BaseModel):
+class ResponseListPlanningSchema(BaseModel):
     message : str
     plannings : List[ReponseGetPlanningSchema]
 

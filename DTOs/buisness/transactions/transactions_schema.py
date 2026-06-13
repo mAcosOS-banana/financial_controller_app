@@ -1,20 +1,24 @@
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, field_validator
 from datetime import date
 from typing import Literal, Optional
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 
 class CreateTransactionSchema(BaseModel):
     title : str = Field(...,min_length=2, max_length=(80))
     description : Optional[str] = Field(None, max_length=250)
-    category : str = Field(..., max_length=32)
-    value : Decimal = Field(..., max_digits=20, decimal_places=2)
+    category_id : str = Field(..., max_length=32)
+    value : Decimal = Field(..., gt=0 ,max_digits=20, decimal_places=2)
     type : Literal["despesa", "receita"] = Field(...)
     due_date : date 
     is_paid : bool = False
     paid_at : Optional[date] = None
 
-    planning_id : str = Field(..., max_length=32)
     created_by : str = Field(..., max_length=32)
+
+    @field_validator("value")
+    @classmethod
+    def normalize_value(cls, v : Decimal):
+        return v.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
 
     @model_validator(mode="after")
     def check_paid_date(self):
@@ -27,8 +31,8 @@ class CreateTransactionSchema(BaseModel):
 class UpdateTransactionSchema(BaseModel):
     title : Optional[str] = Field(None, max_length=(80))
     description : Optional[str] = Field(None, max_length=250)
-    category : Optional[str] = Field(None, max_length=32)
-    value : Optional[Decimal] = Field(None, max_digits=20, decimal_places=2)
+    category_id : Optional[str] = Field(None, max_length=32)
+    value : Optional[Decimal] = Field(None, gt=0, max_digits=20, decimal_places=2)
     type : Optional[Literal["despesa", "receita"]] = None
     due_date : Optional[date] = None
     is_paid : Optional[bool] = None
@@ -43,6 +47,7 @@ class UpdateTransactionSchema(BaseModel):
     
 
 class ResponseDeleteTrasactionSchema(BaseModel):
+    message : str
     title : str 
     description : Optional[str] = None
     category_name : str
