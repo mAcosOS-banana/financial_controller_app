@@ -6,6 +6,8 @@ from DTOs.buisness.transactions.transactions_schema import (
 from models.buisness_models.planning_models.planning import Planning
 
 from utils.context_manager import db_transaction
+from utils.exceptions import ConflictError, NotFoundError, ForbiddenError, UnauthorizedError
+
 from models.buisness_models.transactions_models.transactions import Transaction
 from models.buisness_models.transactions_models.categories import Category
 
@@ -14,20 +16,33 @@ from server.extensions import db
 class TransactionsService:
     
     @staticmethod
-    def create(planning_id : str, data : CreateTransactionSchema, creator_id : str):
-
-
+    def _get_authorized_planning(planning_id, user_id):
         planning = Planning.query.get(planning_id)
         if not planning or planning.is_deleted:
-            raise ValueError("Planning não entrado.")
-        if not creator_id in [m.id for m in planning.members]:
-            raise ValueError("Usuário não pertence ou não tem acesso ao planning")
-        
+            raise NotFoundError("Planning não encontrado.")
+        if not user_id in [m.id for m in planning.members]:
+            raise ForbiddenError("Usuário não pertence ou não tem acesso ao planning")
+        return planning
+    
+    @staticmethod
+    def _get_authorized_transaction(transaction_id: str, user_id: str) -> Transaction:
+        transaction = Transaction.query.get(transaction_id)
+        if not transaction or transaction.is_deleted:
+            raise NotFoundError("Transação não encontrada")
+        if user_id not in [m.id for m in transaction.planning.members]:
+            raise ForbiddenError("Você não tem acesso a essa transação")
+        return transaction
+
+
+    @staticmethod
+    def create(planning_id : str, data : CreateTransactionSchema, creator_id : str):
+        TransactionsService._get_authorized_planning()
+    
         category = Category.query.get(data.category_id)
         if not category:
-            raise ValueError("Categoria não existe")
+            raise NotFoundError("Categoria não encontrada")
         if category.planning_id is not None and category.planning_id != planning_id:
-            raise ValueError("Categoria inválida para este planning")
+            raise UnauthorizedError("Categoria inválida para este planning")
 
         with db_transaction():
             transaction = Transaction(
@@ -47,20 +62,15 @@ class TransactionsService:
    
     @staticmethod
     def update(transaction_id: str, data : UpdateTransactionSchema, updater_id : str):
-        transaction = Transaction.query.get(transaction_id)
-        if not transaction or transaction.is_deleted:
-            raise ValueError("Transação não econtrada")
-        
-        if updater_id not in [m.id for m in transaction.planning.members]:
-            raise ValueError("Você não tem acesso a essa transação")
+        transaction = TransactionsService._get_authorized_transaction()
         
         update_data = data.model_dump(exclude_unset=True)
         if "category_id" in update_data:
             category = Category.query.get(data.category_id)
             if not category:
-                raise ValueError("Categoria não encontrada.")
+                raise NotFoundError("Categoria não encontrada.")
             if category.planning_id is not None and category.planning_id != transaction.planning_id:
-                raise ValueError("Categoria inválida para este planning")
+                raise UnauthorizedError("Categoria inválida para este planning")
 
         with db_transaction():
             for field, value in update_data.items():
@@ -75,11 +85,11 @@ class TransactionsService:
         transaction = Transaction.query.get(transaction_id)
         
         if not transaction:
-            raise ValueError("Transação não encontrada")
+            raise NotFoundError("Transação não encontrada")
         if updater_id not in [m.id for m in transaction.planning.members]:
-            raise ValueError("Você não tem acesso a essa transação")
+            raise ForbiddenError("Você não tem acesso a essa transação")
         if transaction.is_deleted:
-            raise ValueError("Transação já foi excluída") 
+            raise ConflictError("Transação já foi excluída") 
         
         with db_transaction():
             transaction.updated_by = updater_id

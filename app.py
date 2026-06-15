@@ -20,7 +20,7 @@ from routes.auth.auth_routes import auth_bp
 
 
 load_dotenv()
-def create_app():
+def create_app(config_overrides=None):
     app = Flask(__name__)
 
     app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
@@ -28,6 +28,9 @@ def create_app():
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY")
     app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=1)
     app.config["JWT_REFRESH_TOKEN_EXPIRES"] = timedelta(days=30)
+
+    if config_overrides:                   
+        app.config.update(config_overrides)
 
     db.init_app(app)
     bcrypt.init_app(app)

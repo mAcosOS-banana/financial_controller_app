@@ -2,17 +2,17 @@ import pytest
 from unittest.mock import patch, MagicMock
 from app import create_app
 from server.extensions import db
+from utils.exceptions import  ConflictError, UnauthorizedError
 from flask_jwt_extended import create_access_token, create_refresh_token
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 @pytest.fixture
 def app():
-    app = create_app()
-    app.config.update({
+    app = create_app({
         "TESTING": True,
-        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",  # banco em memória
+        "SQLALCHEMY_DATABASE_URI": "sqlite:///:memory:",
         "JWT_SECRET_KEY": "test-secret",
-    })
+}   )
     with app.app_context():
         db.create_all()
         yield app
@@ -69,7 +69,7 @@ class TestRegister:
     @patch("routes.auth.auth_routes.AuthenticationService.register")
     def test_register_email_already_exists(self, mock_register, client):
         # service lança ValueError quando email já existe
-        mock_register.side_effect = ValueError("Email ja cadastrado")
+        mock_register.side_effect = ConflictError("Email ja cadastrado")
 
         resp = client.post("/auth/register", json={
             "name": "João",
@@ -77,7 +77,7 @@ class TestRegister:
             "password": "Banana@123",
         })
 
-        assert resp.status_code == 401
+        assert resp.status_code == 409
         data = resp.get_json()
         assert data["errors"][0]["msg"] == "Email ja cadastrado"
 
@@ -110,7 +110,7 @@ class TestLogin:
 
     @patch("routes.auth.auth_routes.AuthenticationService.login")
     def test_login_invalid_credentials(self, mock_login, client):
-        mock_login.side_effect = ValueError("Credenciais invalidas")
+        mock_login.side_effect = UnauthorizedError("Credenciais invalidas")
 
         resp = client.post("/auth/login", json={
             "email": "joao@banana.com",

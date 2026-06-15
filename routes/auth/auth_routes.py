@@ -17,7 +17,7 @@ from DTOs.auth.getter.get_me_response_schema import ResponseUserSchema
 from pydantic import ValidationError
 
 from utils.error import AppError
-
+from utils.exceptions import AppException
 
 auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
@@ -45,13 +45,13 @@ def register():
         
         return jsonify(response_validate_model.model_dump()), 400
 
-    except ValueError as e:
+    except AppException as e:
         response_validate_model = RegisterFailResponseSchema.model_validate({
             "message": "Erro de validação, por favor revise os campos",
             "errors" : [AppError.from_value_error(e)]
         })
         
-        return jsonify(response_validate_model.model_dump()), 401
+        return jsonify(response_validate_model.model_dump()), e.status_code
     
 
 @auth_bp.route("/login", methods=["POST"])
@@ -78,13 +78,13 @@ def login():
 
         return jsonify(response_validated.model_dump()), 400
 
-    except ValueError as e: 
+    except AppException as e: 
         response_validated = LoginFailResponseSchema.model_validate({
             "message" : "Erro de validação, por favor revise os campos.",
             "errors": [AppError.from_value_error(e)]
         })
 
-        return jsonify(response_validated.model_dump()), 401
+        return jsonify(response_validated.model_dump()), e.status_code
 
 @auth_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
