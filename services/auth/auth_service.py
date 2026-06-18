@@ -7,8 +7,8 @@ from utils.context_manager import db_transaction
 
 from utils.exceptions import AppException, ConflictError, NotFoundError, ForbiddenError, UnauthorizedError
 
-from DTOs.auth.register.register_schemas import RegisterSchema 
-from DTOs.auth.login.login_schemas import LoginSchema 
+from validators.auth.register.register_schemas import RegisterSchema 
+from validators.auth.login.login_schemas import LoginSchema 
 
 
 class AuthenticationService:
@@ -22,8 +22,9 @@ class AuthenticationService:
             user = User(name=data.name, email=data.email)
             user.set_password(data.password)
             db.session.add(user)
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+            db.session.flush()
+        access_token = create_access_token(identity=str((user.id)))
+        refresh_token = create_refresh_token(identity=str((user.id)))
 
         return user, access_token, refresh_token
 
@@ -33,8 +34,8 @@ class AuthenticationService:
         if not user or not user.check_password(data.password):
             raise UnauthorizedError("Credenciais Inválidas.")
         
-        access_token = create_access_token(identity=user.id)
-        refresh_token = create_refresh_token(identity=user.id)
+        access_token = create_access_token(identity=str((user.id)))
+        refresh_token = create_refresh_token(identity=str((user.id)))
 
         return access_token, refresh_token
     

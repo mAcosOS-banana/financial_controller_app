@@ -13,7 +13,6 @@ class CreateTransactionSchema(BaseModel):
     is_paid : bool = False
     paid_at : Optional[date] = None
 
-    created_by : str = Field(..., max_length=32)
 
     @field_validator("value")
     @classmethod

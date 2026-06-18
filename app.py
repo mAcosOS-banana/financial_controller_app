@@ -1,6 +1,5 @@
 from flask import Flask
-from flask_login import login_manager, current_user
-
+from server.errors_handllers import _register_error_handlers
 from server.extensions import db
 from server.extensions import bcrypt
 from server.extensions import jwt_manager
@@ -17,7 +16,8 @@ from models.buisness_models.transactions_models.categories  import Category
 from models.buisness_models.planning_models.planning import Planning
 
 from routes.auth.auth_routes import auth_bp
-
+from routes.business.planning.planning_routes import planning_bp
+from routes.business.transactions.transactions_routes import transactions_bp
 
 load_dotenv()
 def create_app(config_overrides=None):
@@ -32,13 +32,19 @@ def create_app(config_overrides=None):
     if config_overrides:                   
         app.config.update(config_overrides)
 
+
     db.init_app(app)
     bcrypt.init_app(app)
     jwt_manager.init_app(app)
     migrate.init_app(app, db)
 
+    _register_error_handlers(app)
+    
     app.register_blueprint(auth_bp)
+    app.register_blueprint(planning_bp)
+    app.register_blueprint(transactions_bp)    
     return app
+
 
 if __name__ == "__main__":
     create_app().run(

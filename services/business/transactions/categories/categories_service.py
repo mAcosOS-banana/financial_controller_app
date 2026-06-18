@@ -1,10 +1,10 @@
-from DTOs.buisness.transactions.categories.categories_schemas import CreateCategorySchema, UpdateCategorySchema
+from validators.buisness.transactions.categories.categories_schemas import CreateCategorySchema, UpdateCategorySchema
 
 from server.extensions import db
 
 from utils.context_manager import db_transaction
-from utils.exceptions import ForbiddenError, NotFoundError, ConflictError, AppException, UnauthorizedError, BadRequestError
-from transactions_service import TransactionsService
+from utils.exceptions import NotFoundError, ConflictError, UnauthorizedError, BadRequestError
+from planning.planning_service import PlanningService
 
 from models.buisness_models.transactions_models.categories import Category
 
@@ -15,7 +15,7 @@ class CategoryService():
         if planning_id is None:
             raise UnauthorizedError("Não é permitido criar categorias sem atribuir um planning")
         
-        planning = TransactionsService._get_authorized_planning(planning_id, creator_id)
+        planning = PlanningService.get_authorized(planning_id, creator_id)
         exists = Category.query.filter_by(name=data.name, planning_id= planning_id).first()
         if exists:
             raise ConflictError("Categoria já existe nesse planning")
@@ -36,8 +36,9 @@ class CategoryService():
         if planning_id is None:
             raise UnauthorizedError("Não é permitido atualizar categorias que não estejam em um planning.")
         
-        planning = TransactionsService._get_authorized_planning(planning_id, updater_id)
+        planning = PlanningService.get_authorized(planning_id, updater_id)
         category = Category.query.get(category_id)
+        
         if not category:
             raise NotFoundError("Categoria não encontrada.")
         if category.planning_id != planning_id: 
@@ -66,7 +67,7 @@ class CategoryService():
         if planning_id is None:
             raise BadRequestError("Não é permitido deletar uma categoria sem informar o planning.")
         
-        planning = TransactionsService._get_authorized_planning(planning_id, updater_id)
+        planning = PlanningService.get_authorized(planning_id, updater_id)
         category = Category.query.get(category_id)
 
         if category.planning_id != planning_id:

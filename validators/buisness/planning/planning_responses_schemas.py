@@ -11,23 +11,40 @@ class MemberSchema(BaseModel):
     class Config:
         from_attributes = True
 
-class ResponseCreatePlannigSuccessSchema(BaseModel):
-    message: str
-    name: str
+
+class PlanningDetails(BaseModel):
+    id : str
     description : Optional[str]
-    members : Optional[MemberSchema] = Field(default_factory=list)
+    name : str
+    members : List[MemberSchema] = Field(default_factory=list) 
+
+    class Config:
+        from_attributes = True
+
+class ResponseCreatePlannigSchema(BaseModel):
+    message: str
+    data : PlanningDetails
     
     class Config:
         from_attributes = True
 
-class ResponseFailPlannigSchema:
+class ResponseUpdatePlannigSchema(BaseModel):
+    message: str
+    data : PlanningDetails
+    
+    class Config:
+        from_attributes = True
+
+class ResponseFailPlannigSchema(BaseModel):
     message : str
     errors : List[ErrorDetails]
 
 class ResponseDeletePlanningSchema(BaseModel):
     message : str
-    id : str
-    name = str
+    data : PlanningDetails
+    
+    class Config:
+        from_attributes = True
 
 class ReponseGetPlanningSchema(BaseModel):
     id : str

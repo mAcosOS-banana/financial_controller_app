@@ -2,17 +2,16 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity,
-    create_access_token,
-    verify_jwt_in_request
+    create_access_token
 )
 from services.auth.auth_service import AuthenticationService
 
-from DTOs.auth.register.register_schemas import RegisterSchema
-from DTOs.auth.register.register_reponses_schemas import RegisterSuccessResponseSchema , RegisterFailResponseSchema
+from validators.auth.register.register_schemas import RegisterSchema
+from validators.auth.register.register_reponses_schemas import RegisterSuccessResponseSchema , RegisterFailResponseSchema
 
-from DTOs.auth.login.login_schemas import LoginSchema
-from DTOs.auth.login.login_responses_schemas import LoginSuccessResponseSchema, LoginFailResponseSchema
-from DTOs.auth.getter.get_me_response_schema import ResponseUserSchema
+from validators.auth.login.login_schemas import LoginSchema
+from validators.auth.login.login_responses_schemas import LoginSuccessResponseSchema, LoginFailResponseSchema
+from validators.auth.getter.get_me_response_schema import ResponseUserSchema
 
 from pydantic import ValidationError
 
@@ -24,68 +23,34 @@ auth_bp = Blueprint("auth", __name__, url_prefix="/auth")
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    try:
-        data = RegisterSchema.model_validate(request.get_json())
-        user , token, refresh = AuthenticationService.register(data)
-        response_validate_model = RegisterSuccessResponseSchema.model_validate({
-            "message" : "Usuário criado com sucesso!",
-            "data": {
-                "user_id" : user.id,
-                "access_token" : token
-            }
-        })
+    data = RegisterSchema.model_validate(request.get_json())
+    user , token, refresh = AuthenticationService.register(data)
+    response_validate_model = RegisterSuccessResponseSchema.model_validate({
+        "message" : "Usuário criado com sucesso!",
+        "data": {
+            "user_id" : user.id,
+            "access_token" : token
+        }
+    })
 
-        return jsonify(response_validate_model.model_dump()) , 201
-    
-    except ValidationError as e:
-        response_validate_model = RegisterFailResponseSchema.model_validate({
-            "message": "Erro de validação, por favor revise os campos",
-            "errors" : AppError.from_pydantic(e)
-        })
-        
-        return jsonify(response_validate_model.model_dump()), 400
-
-    except AppException as e:
-        response_validate_model = RegisterFailResponseSchema.model_validate({
-            "message": "Erro de validação, por favor revise os campos",
-            "errors" : [AppError.from_value_error(e)]
-        })
-        
-        return jsonify(response_validate_model.model_dump()), e.status_code
+    return jsonify(response_validate_model.model_dump()) , 201
     
 
 @auth_bp.route("/login", methods=["POST"])
 def login():
-    try:
-        data = LoginSchema.model_validate(request.get_json())
-        access_token, refresh_token = AuthenticationService.login(data)
+    data = LoginSchema.model_validate(request.get_json())
+    access_token, refresh_token = AuthenticationService.login(data)
 
-        response_validated = LoginSuccessResponseSchema.model_validate({
-            "message" : "Login bem-sucedido",
-            "data":{
-                "access_token": access_token,
-                "refresh_token" : refresh_token
-            }
-        })
-        
-        return jsonify(response_validated.model_dump()), 200
+    response_validated = LoginSuccessResponseSchema.model_validate({
+        "message" : "Login bem-sucedido",
+        "data":{
+            "access_token": access_token,
+            "refresh_token" : refresh_token
+        }
+    })
     
-    except ValidationError as e:
-        response_validated = LoginFailResponseSchema.model_validate({
-            "message" : "Erro de validação, por favor revise os campos.",
-            "errors": AppError.from_pydantic(e)
-        })
-
-        return jsonify(response_validated.model_dump()), 400
-
-    except AppException as e: 
-        response_validated = LoginFailResponseSchema.model_validate({
-            "message" : "Erro de validação, por favor revise os campos.",
-            "errors": [AppError.from_value_error(e)]
-        })
-
-        return jsonify(response_validated.model_dump()), e.status_code
-
+    return jsonify(response_validated.model_dump()), 200
+    
 @auth_bp.route("/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh():
