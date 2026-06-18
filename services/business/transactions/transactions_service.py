@@ -3,6 +3,8 @@ from validators.buisness.transactions.transactions_schema import (
     UpdateTransactionSchema
 )
 
+from sqlalchemy.orm import joinedload
+
 from models.buisness_models.planning_models.planning import Planning
 
 from utils.context_manager import db_transaction
@@ -57,6 +59,7 @@ class TransactionsService:
             db.session.add(transaction)
         return transaction
    
+   
     @staticmethod
     def update(transaction_id: str, data : UpdateTransactionSchema, updater_id : str):
         transaction = TransactionsService._get_authorized_transaction(transaction_id= transaction_id, user_id=updater_id)
@@ -77,7 +80,8 @@ class TransactionsService:
             
         
         return transaction
-        
+
+
     @staticmethod   
     def delete(transaction_id : str, updater_id : str):
         transaction = TransactionsService._get_authorized_transaction(transaction_id= transaction_id, user_id=updater_id)
@@ -95,4 +99,31 @@ class TransactionsService:
             transaction.deleted_at = db.func.now()
         
         return transaction      
+    
+
+    @staticmethod
+    def get(user_id : str, transaction_id : str):
+        transaction = TransactionsService._get_authorized_transaction(
+            transaction_id=transaction_id,
+            user_id=user_id
+        )
+
+        return transaction
+    
+
+    @staticmethod
+    def list_by_planning(planning_id: str, user_id: str, page=1, per_page=20):
+        PlanningService.get_authorized(planning_id=planning_id, user_id=user_id)
+
+
+        pagination = (Transaction.query
+            .filter_by(planning_id=planning_id, is_deleted=False)
+            .options(joinedload(Transaction.creator), joinedload(Transaction.updater))
+            .order_by(Transaction.due_date.desc())
+            .paginate(page=page, per_page=per_page, error_out=False)
+        )   
+
+
+        return pagination
+        
 

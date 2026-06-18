@@ -4,6 +4,8 @@ from decimal import Decimal
 from typing import Optional, List
 from datetime import date
 
+from utils.schemas.pagination import PaginationMeta
+
 class UserSummarySchema(BaseModel):
     id: str
     name : str
@@ -32,15 +34,25 @@ class ResponseFailTrasaction(BaseModel):
 class ResponseCreateTransaction(BaseModel):
     message : str
     data : TransactionDetailSchema
+    
+    class Config:
+        from_attributes = True
 
 class ResponseUpdateTransaction(BaseModel):
     message : str
     data : TransactionDetailSchema
 
+    class Config:
+        from_attributes = True
+
 class ResponseTransactionListSchema(BaseModel):
     message : str
     data : List[TransactionDetailSchema]
+    pagination : PaginationMeta
 
+    class Config:
+        from_attributes = True
+        
 class ResponseDeleteTrasactionSchema(BaseModel):
     message : str
     data : TransactionDetailSchema

@@ -1,4 +1,4 @@
-from models.buisness_models.planning_models.planning import Planning
+from models.buisness_models.planning_models.planning import Planning, planning_user
 from models.auth_models.user_models.user_model import User
 
 from utils.exceptions import ConflictError, NotFoundError, ForbiddenError
@@ -78,3 +78,25 @@ class PlanningService:
             planning.updated_by = updater_id
 
         return planning
+    
+
+    @staticmethod
+    def get(planning_id : str, user_id: str):
+        planning = PlanningService.get_authorized(planning_id=planning_id, user_id=user_id)
+
+        return planning
+    
+    
+    @staticmethod
+    def list_plannings(user_id: str, page=1, per_page=20):
+        pagination = (Planning.query
+            .join(planning_user)
+            .filter(
+                planning_user.c.user_id == user_id,
+                Planning.is_deleted == False
+            )
+            .order_by(Planning.created_at.desc())
+            .paginate(page=page, per_page=per_page, error_out=False)
+        )
+
+        return pagination

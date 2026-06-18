@@ -15,7 +15,7 @@ class MemberSchema(BaseModel):
 class CreatePlanningSchema(BaseModel):
     name : str = Field(..., min_length=2, max_length=80)
     description : Optional[str] = Field(None, max_length=250)
-    members : Optional[MemberSchema] = Field(default_factory=list)
+    members : Optional[List[str]] = Field(default_factory=list)
     
     class Config:
         from_attributes = True

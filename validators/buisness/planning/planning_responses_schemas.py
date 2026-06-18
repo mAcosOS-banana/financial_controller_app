@@ -1,9 +1,9 @@
 from pydantic import BaseModel, Field
 from pydantic_core import ErrorDetails
 from typing import Optional, List
+from utils.schemas.pagination import PaginationMeta
 
 
-# Receberá o JSON com name, description e members que é uma lista de users_ids
 class MemberSchema(BaseModel):
     id: str
     name : str
@@ -12,7 +12,7 @@ class MemberSchema(BaseModel):
         from_attributes = True
 
 
-class PlanningDetails(BaseModel):
+class PlanningDetailsSchema(BaseModel):
     id : str
     description : Optional[str]
     name : str
@@ -23,14 +23,14 @@ class PlanningDetails(BaseModel):
 
 class ResponseCreatePlannigSchema(BaseModel):
     message: str
-    data : PlanningDetails
+    data : PlanningDetailsSchema
     
     class Config:
         from_attributes = True
 
 class ResponseUpdatePlannigSchema(BaseModel):
     message: str
-    data : PlanningDetails
+    data : PlanningDetailsSchema
     
     class Config:
         from_attributes = True
@@ -41,23 +41,22 @@ class ResponseFailPlannigSchema(BaseModel):
 
 class ResponseDeletePlanningSchema(BaseModel):
     message : str
-    data : PlanningDetails
+    data : PlanningDetailsSchema
     
     class Config:
         from_attributes = True
 
 class ReponseGetPlanningSchema(BaseModel):
-    id : str
-    description : str
-    name : str
-    members : List[MemberSchema] = Field(default_factory=list) 
+    message : str
+    data : PlanningDetailsSchema
 
     class Config:
         from_attributes = True
 
 class ResponseListPlanningSchema(BaseModel):
     message : str
-    plannings : List[ReponseGetPlanningSchema]
+    data : List[PlanningDetailsSchema]
+    pagination : PaginationMeta
 
     class Config:
-        from_attributes= True
+        from_attributes = True

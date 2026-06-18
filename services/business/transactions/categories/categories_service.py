@@ -1,5 +1,7 @@
 from validators.buisness.transactions.categories.categories_schemas import CreateCategorySchema, UpdateCategorySchema
 
+from sqlalchemy.orm import joinedload
+
 from server.extensions import db
 
 from utils.context_manager import db_transaction
@@ -83,5 +85,45 @@ class CategoryService():
             category.updated_by = updater_id
         
         return category
+    
 
+    @staticmethod
+    def get(planning_id : str , user_id : str, category_id : str):   
+        planning = PlanningService.get_authorized(planning_id=planning_id, user_id=user_id)
+        category = (Category.query
+            .filter(
+                Category.id == category_id,
+                Category.is_deleted == False,
+                db.or_(
+                    Category.planning_id == None,
+                    Category.planning_id == planning_id
+                )
+            )
+            .first()
+        )
+
+        if not category:
+            raise NotFoundError("Categoria não encontrada.")
+
+        return category
+    
+
+    @staticmethod
+    def list_by_planning(planning_id : str, user_id: str):
+        planning = PlanningService.get_authorized(planning_id=planning_id, user_id= user_id)
+
+        categories = (Category.query
+            .filter(
+                Category.is_deleted == False,
+                db.or_(
+                    Category.planning_id == None,          # globais
+                    Category.planning_id == planning_id    # do planning
+                )
+            )
+            .order_by(Category.name)
+            .all()
+        )
+        
+        return categories
+    
         
