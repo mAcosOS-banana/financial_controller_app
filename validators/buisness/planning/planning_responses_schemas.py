@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from pydantic_core import ErrorDetails
 from typing import Optional, List
 from utils.schemas.pagination import PaginationMeta
@@ -8,8 +8,7 @@ class MemberSchema(BaseModel):
     id: str
     name : str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 
 class PlanningDetailsSchema(BaseModel):
@@ -17,23 +16,22 @@ class PlanningDetailsSchema(BaseModel):
     description : Optional[str]
     name : str
     members : List[MemberSchema] = Field(default_factory=list) 
-
-    class Config:
-        from_attributes = True
+    creator : MemberSchema
+    updater : MemberSchema
+    
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 class ResponseCreatePlannigSchema(BaseModel):
     message: str
     data : PlanningDetailsSchema
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 class ResponseUpdatePlannigSchema(BaseModel):
     message: str
     data : PlanningDetailsSchema
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 class ResponseFailPlannigSchema(BaseModel):
     message : str
@@ -43,20 +41,17 @@ class ResponseDeletePlanningSchema(BaseModel):
     message : str
     data : PlanningDetailsSchema
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 class ReponseGetPlanningSchema(BaseModel):
     message : str
     data : PlanningDetailsSchema
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 class ResponseListPlanningSchema(BaseModel):
     message : str
     data : List[PlanningDetailsSchema]
     pagination : PaginationMeta
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)

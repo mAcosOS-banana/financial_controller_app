@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
 from pydantic_core import ErrorDetails
 from typing import List
 
@@ -6,8 +6,7 @@ class ResgisterAuthDataSchema(BaseModel):
     user_id : str
     access_token : str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 
 class RegisterSuccessResponseSchema(BaseModel):
@@ -15,8 +14,7 @@ class RegisterSuccessResponseSchema(BaseModel):
     data : ResgisterAuthDataSchema
     
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 
 class RegisterFailResponseSchema(BaseModel):

@@ -17,6 +17,7 @@ dependencies = [
     "flask-bcrypt==1.0.1",
     "flask-jwt-extended==4.7.4",
     "flask-login==0.6.3",
+    "flask-migrate>=4.1.0",
     "flask-sqlalchemy==3.1.1",
     "greenlet==3.5.1",
     "idna==3.18",

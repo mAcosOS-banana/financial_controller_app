@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict, computed_field
 from pydantic_core import ErrorDetails
 from decimal import Decimal
 from typing import Optional, List
@@ -10,8 +10,7 @@ class UserSummarySchema(BaseModel):
     id: str
     name : str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 class TransactionDetailSchema(BaseModel):
     id: str
@@ -24,8 +23,12 @@ class TransactionDetailSchema(BaseModel):
     creator : UserSummarySchema
     updater : Optional[UserSummarySchema] = None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
+
+    @computed_field
+    @property
+    def is_paid(self) -> bool:
+        return True if self.paid_at else False
 
 class ResponseFailTrasaction(BaseModel):
     message: str
@@ -33,30 +36,32 @@ class ResponseFailTrasaction(BaseModel):
 
 class ResponseCreateTransaction(BaseModel):
     message : str
-    data : TransactionDetailSchema
+    data : TransactionDetailSchema  
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 class ResponseUpdateTransaction(BaseModel):
     message : str
     data : TransactionDetailSchema
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 class ResponseTransactionListSchema(BaseModel):
     message : str
     data : List[TransactionDetailSchema]
     pagination : PaginationMeta
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
         
 class ResponseDeleteTrasactionSchema(BaseModel):
     message : str
     data : TransactionDetailSchema
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
+
+class ResponseGetTransactionSchema(BaseModel):
+    message : str
+    data : TransactionDetailSchema
+    
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 

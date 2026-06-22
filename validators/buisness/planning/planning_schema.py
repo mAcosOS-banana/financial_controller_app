@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, Field, EmailStr, ConfigDict
 from pydantic_core import ErrorDetails
 from typing import Optional, List
 
@@ -8,8 +8,7 @@ class MemberSchema(BaseModel):
     name : str
     email : EmailStr
     
-    class Config:
-        from_attributes : True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 
 class CreatePlanningSchema(BaseModel):
@@ -17,8 +16,7 @@ class CreatePlanningSchema(BaseModel):
     description : Optional[str] = Field(None, max_length=250)
     members : Optional[List[str]] = Field(default_factory=list)
     
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 
 class UpdatePlanningSchema(BaseModel):
@@ -26,6 +24,5 @@ class UpdatePlanningSchema(BaseModel):
     description : Optional[str] = Field(None, max_length=250)
     members : Optional[MemberSchema] = Field(None)
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 

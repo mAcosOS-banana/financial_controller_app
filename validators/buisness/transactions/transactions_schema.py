@@ -1,8 +1,8 @@
-from pydantic import BaseModel, Field, model_validator, field_validator
+from pydantic import BaseModel, Field, model_validator, field_validator, ConfigDict
 from datetime import date
 from typing import Literal, Optional
 from decimal import Decimal, ROUND_HALF_UP
-
+from utils.exceptions import ConflictError
 class CreateTransactionSchema(BaseModel):
     title : str = Field(...,min_length=2, max_length=(80))
     description : Optional[str] = Field(None, max_length=250)
@@ -22,10 +22,12 @@ class CreateTransactionSchema(BaseModel):
     @model_validator(mode="after")
     def check_paid_date(self):
         if self.is_paid and self.paid_at is None:
-            raise ValueError("Se a conta está paga, informe a data de pagamento")
+            raise ConflictError("Se a conta está paga, informe a data de pagamento")
         if not self.is_paid and self.paid_at is not None:
-            raise ValueError("Não envie data de pagamento para conta não paga")
+            raise ConflictError("Não envie data de pagamento para conta não paga")
         return self
+    
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
     
 class UpdateTransactionSchema(BaseModel):
     title : Optional[str] = Field(None, max_length=(80))
@@ -41,9 +43,10 @@ class UpdateTransactionSchema(BaseModel):
     @model_validator(mode="after")
     def check_paid_date(self):
         if self.is_paid and self.paid_at is None:
-            raise ValueError("Se a conta está paga, informe a data de pagamento") 
+            raise ConflictError("Se a conta está paga, informe a data de pagamento") 
         return self
     
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)
 
 class ResponseDeleteTrasactionSchema(BaseModel):
     message : str
@@ -52,5 +55,4 @@ class ResponseDeleteTrasactionSchema(BaseModel):
     category_name : str
     value : str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True, str_strip_whitespace=True)

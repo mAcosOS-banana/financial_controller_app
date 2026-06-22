@@ -12,12 +12,13 @@ from datetime import timedelta
 
 from models.auth_models.user_models.user_model import User
 from models.buisness_models.transactions_models.transactions import Transaction
-from models.buisness_models.transactions_models.categories  import Category
+from models.buisness_models.categories_models.categories  import Category
 from models.buisness_models.planning_models.planning import Planning
 
 from routes.auth.auth_routes import auth_bp
 from routes.business.planning.planning_routes import planning_bp
 from routes.business.transactions.transactions_routes import transactions_bp
+from routes.business.categories.categories_routes import categories_bp
 
 load_dotenv()
 def create_app(config_overrides=None):
@@ -42,7 +43,8 @@ def create_app(config_overrides=None):
     
     app.register_blueprint(auth_bp)
     app.register_blueprint(planning_bp)
-    app.register_blueprint(transactions_bp)    
+    app.register_blueprint(transactions_bp)
+    app.register_blueprint(categories_bp)
     return app
 
 

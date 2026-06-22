@@ -1,4 +1,4 @@
-from validators.buisness.transactions.categories.categories_schemas import CreateCategorySchema, UpdateCategorySchema
+from validators.buisness.categories.categories_schemas import CreateCategorySchema, UpdateCategorySchema
 
 from sqlalchemy.orm import joinedload
 
@@ -6,9 +6,9 @@ from server.extensions import db
 
 from utils.context_manager import db_transaction
 from utils.exceptions import NotFoundError, ConflictError, UnauthorizedError, BadRequestError
-from planning.planning_service import PlanningService
+from services.business.planning.planning_service import PlanningService
 
-from models.buisness_models.transactions_models.categories import Category
+from models.buisness_models.categories_models.categories import Category
 
 class CategoryService():
 
@@ -27,7 +27,7 @@ class CategoryService():
                 name = data.name,
                 color = data.color,
                 planning_id = planning_id,
-
+                updated_by = creator_id,
                 created_by = creator_id
             )
             db.session.add(category)
@@ -109,10 +109,10 @@ class CategoryService():
     
 
     @staticmethod
-    def list_by_planning(planning_id : str, user_id: str):
+    def list_by_planning(planning_id : str, user_id: str, search= None):
         planning = PlanningService.get_authorized(planning_id=planning_id, user_id= user_id)
 
-        categories = (Category.query
+        query = (Category.query
             .filter(
                 Category.is_deleted == False,
                 db.or_(
@@ -120,10 +120,17 @@ class CategoryService():
                     Category.planning_id == planning_id    # do planning
                 )
             )
-            .order_by(Category.name)
-            .all()
         )
         
+        if search:
+            termo = f"%{search}%"
+            query = query.filter(
+                Category.name.ilike(termo)
+            )
+
+        categories = query.order_by(
+            Category.name.asc()
+        ).all()
         return categories
     
         

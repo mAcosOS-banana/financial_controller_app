@@ -1,6 +1,8 @@
 from models.buisness_models.planning_models.planning import Planning, planning_user
 from models.auth_models.user_models.user_model import User
 
+from sqlalchemy.orm import joinedload
+
 from utils.exceptions import ConflictError, NotFoundError, ForbiddenError
 
 from validators.buisness.planning.planning_schema import CreatePlanningSchema, UpdatePlanningSchema
@@ -88,15 +90,27 @@ class PlanningService:
     
     
     @staticmethod
-    def list_plannings(user_id: str, page=1, per_page=20):
-        pagination = (Planning.query
+    def list_plannings(user_id: str, page=1, per_page=20, search=None):
+        query = (Planning.query
             .join(planning_user)
             .filter(
                 planning_user.c.user_id == user_id,
                 Planning.is_deleted == False
             )
-            .order_by(Planning.created_at.desc())
-            .paginate(page=page, per_page=per_page, error_out=False)
+            .options(joinedload(Planning.creator), joinedload(Planning.updater))
         )
 
+        if search:
+            termo = f"%{search}%"
+            query = query.filter(
+                db.or_(
+                    Planning.name.ilike(termo),
+                    Planning.description.ilike(termo)
+                )
+            )
+
+        pagination = (query
+            .order_by(Planning.created_at.desc())
+            .paginate(page=page, per_page=per_page, error_out=False))
+        
         return pagination

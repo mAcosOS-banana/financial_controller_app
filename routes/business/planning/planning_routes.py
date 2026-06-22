@@ -81,14 +81,14 @@ def get(planning_id : str):
 
     return jsonify(response_model_validated.model_dump()), 200
 
-
 @planning_bp.route("",methods=["GET"])
 @jwt_required()
 def list():
     user_id = get_jwt_identity()
     page = request.args.get("page", 1, type=int)
     per_page = request.args.get("per_page", 20, type=int)
-    pagination = PlanningService.list_plannings(user_id=user_id, page=page, per_page=per_page)
+    search = request.args.get("search", None, type=str)
+    pagination = PlanningService.list_plannings(user_id=user_id, page=page, per_page=per_page, search=search)
 
     response_model_validated = ResponseListPlanningSchema.model_validate({
         "message" : "Plannings encontrados:",

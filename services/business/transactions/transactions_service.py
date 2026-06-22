@@ -13,7 +13,7 @@ from utils.exceptions import ConflictError, NotFoundError, ForbiddenError, Unaut
 from services.business.planning.planning_service import PlanningService
 
 from models.buisness_models.transactions_models.transactions import Transaction
-from models.buisness_models.transactions_models.categories import Category
+from models.buisness_models.categories_models.categories import Category
 
 from server.extensions import db
 
@@ -112,17 +112,25 @@ class TransactionsService:
     
 
     @staticmethod
-    def list_by_planning(planning_id: str, user_id: str, page=1, per_page=20):
+    def list_by_planning(planning_id: str, user_id: str, page=1, per_page=20, search=None):
         PlanningService.get_authorized(planning_id=planning_id, user_id=user_id)
 
 
-        pagination = (Transaction.query
+        query = (Transaction.query
             .filter_by(planning_id=planning_id, is_deleted=False)
-            .options(joinedload(Transaction.creator), joinedload(Transaction.updater))
-            .order_by(Transaction.due_date.desc())
-            .paginate(page=page, per_page=per_page, error_out=False)
-        )   
+            .options(joinedload(Transaction.creator), joinedload(Transaction.updater))   
+        ) 
+        
+        if search:
+            termo = f"%{search}%"
+            query = query.filter(
+                db.or_(
+                    Transaction.title.ilike(termo),
+                    Transaction.description.ilike(termo)
+                )
+            )
 
+        pagination = query.order_by(Transaction.due_date.desc()).paginate(page=page, per_page=per_page, error_out=False)
 
         return pagination
         

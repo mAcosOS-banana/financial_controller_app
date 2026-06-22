@@ -8,7 +8,8 @@ from validators.buisness.transactions.transactions_reponses_schemas import (
     ResponseCreateTransaction,
     ResponseUpdateTransaction,
     ResponseTransactionListSchema,
-    ResponseDeleteTrasactionSchema
+    ResponseDeleteTrasactionSchema,
+    ResponseGetTransactionSchema
 )
 
 from validators.buisness.transactions.transactions_schema import (
@@ -22,7 +23,7 @@ from services.business.transactions.transactions_service import TransactionsServ
 
 from utils.error import AppError
 from utils.exceptions import AppException
-
+from utils.schemas.pagination import PaginationMeta
 
 transactions_bp = Blueprint("transactions", __name__, url_prefix="/plannings")
 
@@ -66,6 +67,46 @@ def delete(transaction_id : str):
     response_model_validated = ResponseDeleteTrasactionSchema.model_validate({
         "message" : "Transação foi excluida com sucesso.",
         "data" : transaction
+    })
+
+    return jsonify(response_model_validated.model_dump()), 200
+
+
+@transactions_bp.route("transactions/<string:transaction_id>",methods=["GET"])
+@jwt_required()
+def get(transaction_id : str):
+    user_id = get_jwt_identity()
+    transaction = TransactionsService.get(
+        user_id=user_id,
+        transaction_id= transaction_id
+    )
+
+    response_validated_model = ResponseGetTransactionSchema.model_validate({
+        "message" : "Transação encontrada.",
+        "data": transaction
+    })
+
+    return jsonify(response_validated_model.model_dump()), 200
+
+@transactions_bp.route("/<string:planning_id>/transactions", methods=["GET"])
+@jwt_required()
+def list(planning_id : str):
+    user_id = get_jwt_identity()
+    page = request.args.get("page", 1, type=int)
+    per_page = request.args.get("per_page", 20, type=int)
+    search = request.args.get("search", None, type=str)
+    pagination = TransactionsService.list_by_planning(
+        user_id=user_id,
+        planning_id=planning_id,
+        page= page,
+        per_page=per_page,
+        search=search
+    )
+
+    response_model_validated = ResponseTransactionListSchema.model_validate({
+        "message" : "Transações encontradas:",
+        "data": pagination.items,
+        "pagination": PaginationMeta.from_pagination(pagination=pagination, per_page=per_page)
     })
 
     return jsonify(response_model_validated.model_dump()), 200
