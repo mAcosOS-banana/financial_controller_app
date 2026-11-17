@@ -31,6 +31,10 @@ def fake_planning(id="plan123", name="Casa", description="desc", members = None)
     p.name = name
     p.description = description
     p.members = members or []
+    p.creator.id = "user123"
+    p.creator.name = "Marcos"
+    p.updater.id = "user123"
+    p.updater.name = "Marcos"
     return p
 
 def fake_member(id="id123", name="Maria"):
