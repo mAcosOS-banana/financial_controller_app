@@ -102,3 +102,4 @@ def list(planning_id : str):
 
 
     return jsonify(response_model_validated.model_dump()), 200
+
